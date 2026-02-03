@@ -48,6 +48,12 @@ class SignupPage {
     // BetterHelp usage question (appears if previousTherapy is Yes)
     this.usedBetterHelpPrompt = page.getByText(/was your previous therapy through betterhelp\?/i);
 
+    // Login form selectors for previous Better Help users
+    this.loginPrompt = page.getByText(/welcome back\!/i);
+    this.emailInput = page.getByRole('textbox', { name: 'Email' });
+    this.passwordInput = page.getByRole('textbox', { name: 'Password' });
+    this.loginButton = page.getByTestId('eap-admin-login-submit');
+
   }
 
   // POM Navigation Workflow Directions
@@ -295,10 +301,23 @@ class SignupPage {
     await label.click();
   }
 
+  // Login flow (appears if usedBetterHelp is Yes)
+  async waitForLoginPrompt() {
+    await expect(this.loginPrompt).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByText('We know your needs can change')).toBeVisible();
+  }
 
-  async fillInputField(labelText, value) {
-    const input = this.page.getByTestId('question-other-text')
+  async login(email, password) {
+    await this.emailInput.waitFor({ state: 'visible', timeout: 10000 });
+    await this.emailInput.fill(email);
+    await this.passwordInput.fill(password);
+    await this.loginButton.click();
+  }
 
+  async performReturningUserLogin(persona) {
+    // Complete login flow for returning BetterHelp users
+    await this.waitForLoginPrompt();
+    await this.login(persona.email, persona.password);
   }
 
   

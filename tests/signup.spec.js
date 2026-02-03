@@ -241,3 +241,54 @@ test.describe('BetterHelp Signup - LGBTQ+ Pathway', () => {
   });
 
 });
+
+
+// Returning BetterHelp User Pathway - Login Flow
+const {
+  returningUserPersonas
+} = require('../test-data/returning-user/returning-personas');
+
+test.describe('BetterHelp Signup - Returning User Pathway', () => {
+
+  test.describe('Returning User - Login Flow', () => {
+
+    for (const persona of returningUserPersonas) {
+      test(`${persona.id} - login with existing account`, async ({ page }) => {
+        const signup = new SignupPage(page);
+
+        await signup.startQuestionnaireBasics(persona);
+
+        // Straight orientation - skips LGBTQ questions
+        await signup.waitForIdentityQuestion();
+        await signup.selectSexualOrientation(persona.orientation);
+
+        // Relationship Status
+        await signup.waitForRelationshipQuestion();
+        await signup.selectRelationship(persona.relationship);
+
+        // Religious Importance - "Not Important" skips religion question
+        await signup.waitForReligiousImportanceQuestion();
+        await signup.selectReligiousImportance(persona.religiousImportance);
+
+        // Spiritual question
+        await signup.waitForSpiritualQuestion();
+        await signup.selectSpiritual(persona.spiritual);
+
+        // Previous therapy question
+        await signup.waitForPreviousTherapyQuestion();
+        await signup.selectPreviousTherapy(persona.previousTherapy);
+
+        // BetterHelp usage question - Yes triggers login flow
+        await signup.waitForUsedBetterHelpQuestion();
+        await signup.selectUsedBetterHelp(persona.usedBetterHelp);
+
+        // Login with existing credentials
+        await signup.performReturningUserLogin(persona);
+
+        // TODO: Add assertions for successful login (dashboard, welcome message, etc.)
+      });
+    }
+
+  });
+
+});
