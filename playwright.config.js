@@ -2,16 +2,20 @@
 const { defineConfig, devices } = require('@playwright/test');
 require('dotenv').config();
 
+const today = new Date();
+const dateDir = `${today.getMonth() + 1}.${String(today.getDate()).padStart(2, '0')}.${today.getFullYear()}`;
+
 module.exports = defineConfig({
-  testDir: './tests', // Make sure this matches your folder name
+  testDir: './tests',
+  outputDir: `./test-results/${dateDir}`,
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry failed tests - useful for flaky third-party sites */
-  retries: process.env.CI ? 2 : 1,
-  /* Reduce parallelism to avoid race conditions with carousel animations */
-  workers: process.env.CI ? 1 : 2,
+  /* Retry on CI only */
+  retries: process.env.CI ? 2 : 0,
+  /* Opt out of parallel tests on CI. */
+  workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. */
